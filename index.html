@@ -39,9 +39,8 @@
           #08080c;
 
         overflow-x: hidden;
+        transition: background 1s ease;
       }
-
-      /* Subtle background glow */
 
       body::before {
         content: "";
@@ -100,6 +99,10 @@
         margin-bottom: 25px;
 
         animation: float 3s ease-in-out infinite;
+
+        transition:
+          transform 0.4s ease,
+          filter 0.4s ease;
       }
 
       h1 {
@@ -113,17 +116,17 @@
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
       }
-      }
-      .text2 {
-        font-size: 8px;
-        line-height: 1.9;
-        color: rgb(254,230,225);
-      }
 
       .text {
         font-size: 17px;
         line-height: 1.9;
         color: rgba(255, 255, 255, 0.72);
+      }
+
+      .text2 {
+        font-size: 10px;
+        line-height: 1.9;
+        color: rgba(255, 204, 204, 0.72);
       }
 
       .quote {
@@ -196,6 +199,251 @@
         box-shadow: 0 12px 40px rgba(255, 90, 170, 0.35);
       }
 
+      .button.secondary {
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: none;
+
+        cursor: pointer;
+        font-family: inherit;
+
+        transition:
+          transform 0.2s ease,
+          background 0.2s ease,
+          border-color 0.2s ease,
+          box-shadow 0.2s ease;
+      }
+
+      .button.secondary:hover {
+        background: rgba(255, 105, 180, 0.09);
+        border-color: rgba(255, 130, 195, 0.28);
+        box-shadow: 0 8px 30px rgba(255, 105, 180, 0.12);
+      }
+
+      /* Hidden section */
+
+      .more-section {
+        max-height: 0;
+        opacity: 0;
+        overflow: hidden;
+
+        transform: translateY(10px);
+
+        transition:
+          max-height 0.8s ease,
+          opacity 0.7s ease,
+          transform 0.7s ease;
+      }
+
+      .more-section.show {
+        max-height: 650px;
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .more-text {
+        margin-top: 25px;
+      }
+
+      .button-row {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      .reveal-button {
+        margin-top: 28px;
+        padding: 13px 28px;
+
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 999px;
+
+        color: #fff;
+
+        font-family: inherit;
+        font-size: 14px;
+        font-weight: 600;
+
+        background: rgba(255, 255, 255, 0.05);
+
+        cursor: pointer;
+
+        transition:
+          transform 0.25s ease,
+          background 0.25s ease,
+          box-shadow 0.25s ease;
+      }
+
+      .reveal-button:hover {
+        transform: translateY(-3px);
+
+        background: rgba(255, 105, 180, 0.08);
+
+        box-shadow: 0 10px 30px rgba(255, 90, 170, 0.12);
+      }
+
+      .reveal-button.hidden {
+        display: none;
+      }
+
+      .reaction {
+        min-height: 28px;
+        margin-top: 18px;
+
+        font-size: 13px;
+        color: rgba(255, 255, 255, 0.5);
+
+        opacity: 1;
+
+        transition:
+          opacity 0.25s ease,
+          transform 0.25s ease;
+      }
+
+      /* Stress button states */
+
+      .stress-1 {
+        transform: scale(1.02);
+      }
+
+      .stress-2 {
+        animation: nervousShake 0.4s ease;
+      }
+
+      .stress-3 {
+        animation: nervousShake 0.3s ease infinite;
+      }
+
+      .stress-4 {
+        animation: panicShake 0.22s ease infinite;
+      }
+
+      .stress-5 {
+        animation: panicShake 0.16s ease infinite;
+        box-shadow:
+          0 0 0 2px rgba(255, 100, 170, 0.08),
+          0 10px 35px rgba(255, 90, 170, 0.3);
+      }
+
+      .stress-6 {
+        animation: panicShake 0.12s ease infinite;
+        background: linear-gradient(135deg, #ff477f, #ff70b8);
+        box-shadow:
+          0 0 30px rgba(255, 70, 130, 0.35),
+          0 15px 45px rgba(255, 90, 170, 0.32);
+      }
+
+      .crying {
+        position: relative;
+        animation: cryingShake 0.1s ease infinite;
+        background: linear-gradient(135deg, #ff476e, #a968ff);
+        box-shadow:
+          0 0 35px rgba(255, 85, 150, 0.4),
+          0 18px 55px rgba(255, 90, 170, 0.35);
+      }
+
+      .crying::after {
+        content: "💧";
+        position: absolute;
+        right: 10px;
+        top: -13px;
+        font-size: 15px;
+        animation: tearDrop 0.9s ease infinite;
+      }
+
+      .crying-text {
+        color: rgba(255, 220, 235, 0.82);
+      }
+
+      .shake {
+        animation: clickShake 0.25s ease;
+      }
+
+      @keyframes clickShake {
+        0% {
+          transform: translateX(0);
+        }
+
+        25% {
+          transform: translateX(-3px);
+        }
+
+        50% {
+          transform: translateX(3px);
+        }
+
+        75% {
+          transform: translateX(-2px);
+        }
+
+        100% {
+          transform: translateX(0);
+        }
+      }
+
+      @keyframes nervousShake {
+        0%,
+        100% {
+          transform: translateX(0) rotate(0);
+        }
+
+        25% {
+          transform: translateX(-2px) rotate(-0.5deg);
+        }
+
+        75% {
+          transform: translateX(2px) rotate(0.5deg);
+        }
+      }
+
+      @keyframes panicShake {
+        0%,
+        100% {
+          transform: translateX(0) rotate(0);
+        }
+
+        25% {
+          transform: translateX(-3px) rotate(-1deg);
+        }
+
+        50% {
+          transform: translateX(3px) rotate(1deg);
+        }
+
+        75% {
+          transform: translateX(-2px) rotate(-0.5deg);
+        }
+      }
+
+      @keyframes cryingShake {
+        0%,
+        100% {
+          transform: translateX(0) rotate(0);
+        }
+
+        50% {
+          transform: translateX(2px) rotate(1deg);
+        }
+      }
+
+      @keyframes tearDrop {
+        0% {
+          opacity: 0;
+          transform: translateY(-2px);
+        }
+
+        30% {
+          opacity: 1;
+        }
+
+        100% {
+          opacity: 0;
+          transform: translateY(14px);
+        }
+      }
+
       .footer {
         margin-top: 35px;
 
@@ -238,13 +486,22 @@
         .quote {
           font-size: 15px;
         }
+
+        .button-row {
+          flex-direction: column;
+        }
+
+        .button,
+        .reveal-button {
+          width: 100%;
+        }
       }
     </style>
   </head>
 
   <body>
     <main class="container">
-      <div class="emoji">🚧</div>
+      <div class="emoji" id="mainEmoji">🚧</div>
 
       <h1>Website Under Construction</h1>
 
@@ -275,9 +532,9 @@
       </p>
 
       <p class="text" style="margin-top: 18px">
-        Hi. 👋
+        Hi baby boy. 👋
         <br />
-        I kinda wanted an excuse to talk to you anyway.
+        I kinda wanted an excuse to talk to you anyway hehe.
         <span class="heart">♥</span>
       </p>
 
@@ -285,19 +542,167 @@
 
       <p class="text">The site isn't finished yet.</p>
 
-      <p class="text" style="margin-top: 12px">
-        Maybe you could help me with that?
-      </p>
-      <p class="text" style="margin-top: -1px, font-size: 8px;">
+      <p class="text2" style="margin-top: -1px">
         And Smo… be nice to me. I’m already a little nervous.
       </p>
 
-      <a href="https://discord.com/users/1418991065574408292" target="_blank" class="button">
-        Come say hi. 💬
-      </a>
+      <!-- First interaction -->
+      <button class="reveal-button" id="revealButton">
+        Wait... there's more? 👀
+      </button>
+
+      <!-- Hidden content -->
+      <div class="more-section" id="moreSection">
+        <p class="text more-text">
+          Maybe you could help me finish it.
+          <br />
+          <span class="highlight">
+            Or maybe I just needed an excuse to talk to you.
+          </span>
+        </p>
+
+        <p class="text" style="margin-top: 18px">
+          Either way...
+          <br />
+          <span class="highlight">
+            I think you owe me a conversation now. ;)
+          </span>
+        </p>
+
+        <div class="button-row">
+          <!-- Discord -->
+          <a
+            href="https://discord.com/users/1418991065574408292"
+            class="button"
+          >
+            Come say hi. 💬
+          </a>
+
+          <!-- Stress / Flirt button -->
+          <button class="button secondary" id="hesitateButton">
+            I'm still deciding...
+          </button>
+        </div>
+
+        <div class="reaction" id="reaction"></div>
+      </div>
 
       <div class="footer">Still building. Still distracted.</div>
     </main>
+
+    <script>
+      const revealButton = document.getElementById("revealButton");
+      const moreSection = document.getElementById("moreSection");
+
+      const hesitateButton = document.getElementById("hesitateButton");
+      const reaction = document.getElementById("reaction");
+      const mainEmoji = document.getElementById("mainEmoji");
+
+      let clickCount = 0;
+
+      const stages = [
+        {
+          text: "I'm still deciding...",
+          reaction: "Take your time. I'm totally not nervous. ♥",
+          emoji: "🚧",
+        },
+        {
+          text: "Wait... you're clicking it?",
+          reaction: "Oh. You actually clicked it. 👀",
+          emoji: "😳",
+        },
+        {
+          text: "Okay, you're making me nervous.",
+          reaction: "I feel like you're enjoying this a little too much. 😭",
+          emoji: "🫣",
+        },
+        {
+          text: "Smo... please.",
+          reaction: "Why are you still clicking this...? 😭",
+          emoji: "🥺",
+        },
+        {
+          text: "I'm literally blushing.",
+          reaction:
+            "This was supposed to be your website. Why am I the one panicking?",
+          emoji: "😵‍💫",
+        },
+        {
+          text: "STOP MAKING ME NERVOUS 😭",
+          reaction: "Okay. Okay. You win. I'm officially panicking.",
+          emoji: "😭",
+        },
+        {
+          text: "Smo, please... I'm crying. 😭💧",
+          reaction: "I CAN'T TAKE IT ANYMORE. JUST COME SAY HI. ♥",
+          emoji: "😭",
+        },
+      ];
+
+      const stressClasses = [
+        "stress-1",
+        "stress-2",
+        "stress-3",
+        "stress-4",
+        "stress-5",
+        "stress-6",
+        "crying",
+      ];
+
+      revealButton.addEventListener("click", () => {
+        moreSection.classList.add("show");
+        revealButton.classList.add("hidden");
+
+        setTimeout(() => {
+          moreSection.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+        }, 300);
+      });
+
+      hesitateButton.addEventListener("click", () => {
+        clickCount++;
+
+        const stageIndex = Math.min(clickCount - 1, stages.length - 1);
+        const stage = stages[stageIndex];
+
+        /* Change text */
+        hesitateButton.textContent = stage.text;
+        reaction.textContent = stage.reaction;
+        mainEmoji.textContent = stage.emoji;
+
+        /* Reset previous stress classes */
+        stressClasses.forEach((className) => {
+          hesitateButton.classList.remove(className);
+        });
+
+        /* Add new stress level */
+        hesitateButton.classList.add(stressClasses[stageIndex]);
+
+        /* Little visual reaction */
+        reaction.classList.remove("shake");
+
+        void reaction.offsetWidth;
+
+        reaction.classList.add("shake");
+
+        /* Increase nervous atmosphere */
+        if (clickCount >= 3) {
+          reaction.classList.add("crying-text");
+        }
+
+        /* Final state */
+        if (clickCount >= 7) {
+          hesitateButton.disabled = true;
+          hesitateButton.style.cursor = "default";
+
+          setTimeout(() => {
+            hesitateButton.textContent = "Please come say hi. 😭💗";
+          }, 500);
+        }
+      });
+    </script>
   </body>
 </html>
 ```
