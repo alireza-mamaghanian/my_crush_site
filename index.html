@@ -1,0 +1,1198 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Building something for Smo... 💕</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap");
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      html {
+        min-height: 100%;
+        scroll-behavior: smooth;
+      }
+
+      body {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow-x: hidden;
+        font-family: "Inter", sans-serif;
+        color: #f5f5f5;
+        background:
+          radial-gradient(
+            circle at 50% 30%,
+            rgba(255, 105, 180, 0.15),
+            transparent 40%
+          ),
+          radial-gradient(
+            circle at 20% 80%,
+            rgba(147, 51, 234, 0.12),
+            transparent 35%
+          ),
+          #09080e;
+        transition: background 0.5s ease;
+      }
+
+      /* Camera Flash Overlay */
+      .flashbang {
+        position: fixed;
+        inset: 0;
+        background: #fff;
+        z-index: 9999;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.05s ease-out;
+      }
+      .flashbang.active {
+        opacity: 1;
+      }
+
+      /* Screen Vignette Overlay */
+      .vignette {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 2;
+        box-shadow: inset 0 0 0px rgba(255, 30, 80, 0);
+        transition: box-shadow 0.4s ease;
+      }
+
+      /* Glows */
+      body::before {
+        content: "";
+        position: fixed;
+        width: 380px;
+        height: 380px;
+        top: -100px;
+        right: -100px;
+        border-radius: 50%;
+        background: rgba(255, 105, 180, 0.15);
+        filter: blur(100px);
+        pointer-events: none;
+      }
+
+      body::after {
+        content: "";
+        position: fixed;
+        width: 350px;
+        height: 350px;
+        bottom: -100px;
+        left: -100px;
+        border-radius: 50%;
+        background: rgba(147, 51, 234, 0.15);
+        filter: blur(100px);
+        pointer-events: none;
+      }
+
+      /* Fullscreen Video Modal (from test3) */
+      .video-container {
+        position: fixed;
+        inset: 0;
+        background: #000;
+        z-index: 5000;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.5s ease;
+      }
+      .video-container.active {
+        display: flex;
+        opacity: 1;
+      }
+      .video-container video {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+      .skip-btn {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        z-index: 5001;
+        background: rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        color: #fff;
+        padding: 10px 20px;
+        border-radius: 99px;
+        cursor: pointer;
+        backdrop-filter: blur(10px);
+        font-family: inherit;
+        font-weight: bold;
+        transition: all 0.2s ease;
+      }
+      .skip-btn:hover {
+        background: rgba(255, 255, 255, 0.4);
+      }
+
+      /* System Warning Banner */
+      .system-banner {
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%) translateY(-100px);
+        background: rgba(255, 35, 80, 0.2);
+        border: 1px solid rgba(255, 35, 80, 0.5);
+        backdrop-filter: blur(10px);
+        color: #ff99bb;
+        padding: 10px 24px;
+        border-radius: 99px;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        z-index: 100;
+        opacity: 0;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        box-shadow: 0 10px 30px rgba(255, 35, 80, 0.3);
+      }
+
+      .system-banner.show {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+      }
+
+      /* Main Container (from TEST2) */
+      .container {
+        position: relative;
+        z-index: 5;
+        width: min(720px, 92%);
+        padding: 50px 36px;
+        text-align: center;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 182, 217, 0.15);
+        border-radius: 28px;
+        backdrop-filter: blur(24px);
+        box-shadow:
+          0 30px 100px rgba(0, 0, 0, 0.6),
+          inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        animation: fadeIn 1.2s ease forwards;
+        transition:
+          transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+          filter 0.4s ease,
+          border-color 0.4s ease;
+      }
+
+      .emoji {
+        font-size: 68px;
+        margin-bottom: 16px;
+        filter: drop-shadow(0 0 25px rgba(255, 105, 180, 0.3));
+        animation: float 3.2s ease-in-out infinite;
+      }
+
+      h1 {
+        font-size: clamp(26px, 5vw, 40px);
+        font-weight: 800;
+        letter-spacing: -1px;
+        margin-bottom: 20px;
+        background: linear-gradient(135deg, #fff 30%, #ffb6d9 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .text {
+        color: rgba(255, 255, 255, 0.85);
+        font-size: 16px;
+        line-height: 1.8;
+      }
+
+      .text2 {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 14px;
+        line-height: 1.6;
+      }
+
+      .quote {
+        margin: 22px auto;
+        max-width: 560px;
+        font-size: 16px;
+        line-height: 1.8;
+        color: rgba(255, 255, 255, 0.95);
+        font-style: italic;
+        padding: 20px 22px;
+        background: rgba(255, 105, 180, 0.05);
+        border-left: 3px solid rgba(255, 105, 180, 0.6);
+        border-right: 3px solid rgba(255, 105, 180, 0.2);
+        border-radius: 16px;
+        box-shadow: 0 8px 32px rgba(255, 105, 180, 0.05);
+      }
+
+      .highlight {
+        color: #ff9dcc;
+        font-weight: 700;
+        text-shadow: 0 0 12px rgba(255, 157, 204, 0.3);
+      }
+
+      .divider {
+        width: 100px;
+        height: 1px;
+        margin: 28px auto;
+        background: linear-gradient(
+          to right,
+          transparent,
+          rgba(255, 105, 180, 0.3),
+          transparent
+        );
+      }
+
+      /* Buttons */
+      .reveal-button {
+        margin-top: 28px;
+        padding: 14px 28px;
+        border: 1px solid rgba(255, 105, 180, 0.4);
+        border-radius: 999px;
+        color: #ffd8ea;
+        background: rgba(255, 105, 180, 0.1);
+        font-family: inherit;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .reveal-button:hover {
+        transform: translateY(-2px) scale(1.02);
+        background: rgba(255, 105, 180, 0.2);
+        box-shadow: 0 10px 30px rgba(255, 105, 180, 0.25);
+      }
+
+      .reveal-button.hidden {
+        display: none;
+      }
+
+      .more-section {
+        max-height: 0;
+        opacity: 0;
+        overflow: hidden;
+        transform: translateY(10px);
+        transition:
+          max-height 0.8s ease,
+          opacity 0.7s ease,
+          transform 0.7s ease;
+      }
+
+      .more-section.show {
+        max-height: 700px;
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .button-row {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 14px;
+        flex-wrap: wrap;
+        margin-top: 28px;
+      }
+
+      .button {
+        text-decoration: none;
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        min-width: 170px;
+        padding: 14px 22px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 105, 180, 0.3);
+        color: #ffffff;
+        background: linear-gradient(
+          135deg,
+          rgba(255, 105, 180, 0.2),
+          rgba(147, 51, 234, 0.2)
+        );
+        font-family: inherit;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.25s ease;
+      }
+
+      .button:hover {
+        transform: translateY(-2px) scale(1.03);
+        box-shadow: 0 12px 30px rgba(255, 105, 180, 0.3);
+      }
+
+      .button.secondary {
+        color: #ffb8d8;
+        border-color: rgba(255, 105, 180, 0.25);
+        background: rgba(255, 105, 180, 0.05);
+      }
+
+      .button.secondary:hover {
+        background: rgba(255, 105, 180, 0.15);
+      }
+
+      .reaction {
+        min-height: 28px;
+        margin-top: 18px;
+        font-size: 14px;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.8);
+      }
+
+      /* Global Screen Shake */
+      .shake-screen-1 {
+        animation: globalShake1 0.3s ease;
+      }
+      .shake-screen-2 {
+        animation: globalShake2 0.3s ease;
+      }
+      .shake-screen-3 {
+        animation: globalShake3 0.25s ease;
+      }
+      .shake-screen-4 {
+        animation: globalShake4 0.2s ease;
+      }
+
+      @keyframes globalShake1 {
+        0%,
+        100% {
+          transform: translate(0, 0);
+        }
+        25% {
+          transform: translate(-4px, 2px);
+        }
+        75% {
+          transform: translate(4px, -2px);
+        }
+      }
+      @keyframes globalShake2 {
+        0%,
+        100% {
+          transform: translate(0, 0);
+        }
+        25% {
+          transform: translate(-8px, 4px) rotate(-0.5deg);
+        }
+        75% {
+          transform: translate(8px, -4px) rotate(0.5deg);
+        }
+      }
+      @keyframes globalShake3 {
+        0%,
+        100% {
+          transform: translate(0, 0);
+        }
+        20% {
+          transform: translate(-12px, 6px) rotate(-1deg);
+        }
+        80% {
+          transform: translate(12px, -6px) rotate(1deg);
+        }
+      }
+      @keyframes globalShake4 {
+        0%,
+        100% {
+          transform: translate(0, 0);
+        }
+        20% {
+          transform: translate(-18px, 10px) rotate(-1.5deg);
+        }
+        80% {
+          transform: translate(18px, -10px) rotate(1.5deg);
+        }
+      }
+
+      .explode {
+        animation: buttonExplode 0.7s ease forwards !important;
+      }
+
+      /* Death Overlay */
+      .death-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+        opacity: 0;
+        background: radial-gradient(
+          circle,
+          rgba(255, 30, 60, 0.4),
+          rgba(0, 0, 0, 0.96)
+        );
+        transition: opacity 0.25s ease;
+      }
+      .death-overlay.active {
+        opacity: 1;
+      }
+      .death-message {
+        text-align: center;
+        transform: scale(0.6);
+        opacity: 0;
+        transition: all 0.5s ease;
+      }
+      .death-overlay.active .death-message {
+        transform: scale(1);
+        opacity: 1;
+      }
+      .death-message .big {
+        font-size: clamp(38px, 8vw, 76px);
+        font-weight: 900;
+        color: #ff2a40;
+        text-shadow: 0 0 30px rgba(255, 42, 64, 0.6);
+      }
+
+      /* Floating Particles */
+      .floating-particle {
+        position: fixed;
+        pointer-events: none;
+        z-index: 90;
+        font-size: 20px;
+        animation: floatParticle 1.2s ease-out forwards;
+      }
+
+      @keyframes floatParticle {
+        0% {
+          opacity: 1;
+          transform: translate(0, 0) scale(0.6);
+        }
+        100% {
+          opacity: 0;
+          transform: translate(var(--dx), var(--dy)) scale(1.4)
+            rotate(var(--rot));
+        }
+      }
+
+      /* Blood Particles */
+      .blood {
+        position: fixed;
+        inset: 0;
+        z-index: 1100;
+        pointer-events: none;
+        overflow: hidden;
+      }
+      .blood-dot {
+        position: absolute;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #ff003c;
+        box-shadow: 0 0 10px #ff003c;
+        animation: bloodFly 1s ease-out forwards;
+      }
+
+      /* =========================================
+         WANTED SCREEN FROM test.html
+      ========================================= */
+      .wanted-wrapper {
+        display: none;
+        position: relative;
+        z-index: 20;
+        width: 100%;
+        min-height: 100vh;
+        padding: 50px 20px;
+        align-items: center;
+        justify-content: center;
+      }
+      .wanted-wrapper.show {
+        display: flex;
+      }
+
+      .wanted-screen {
+        width: min(900px, 100%);
+        position: relative;
+        padding: 40px 32px;
+        color: #1a1310;
+        background: linear-gradient(
+          rgba(255, 248, 220, 0.98),
+          rgba(245, 230, 190, 0.98)
+        );
+        border: 5px solid #251a13;
+        box-shadow: 0 30px 90px rgba(0, 0, 0, 0.8);
+        transform: rotate(-0.5deg);
+        animation: wantedAppear 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+      }
+
+      .wanted-avatar-placeholder {
+        width: 300px;
+        height: 300px;
+        margin: 15px auto;
+        border: 3px dashed #251a13;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 50px;
+        background: rgba(0, 0, 0, 0.04);
+        background-size: contain;
+        background-position: center;
+        background-repeat: no-repeat;
+      }
+
+      .wanted-top {
+        text-align: center;
+        border-bottom: 3px solid #251a13;
+        padding-bottom: 18px;
+        margin-bottom: 24px;
+      }
+      .wanted-top .breaking {
+        font-size: 16px;
+        font-weight: 900;
+        letter-spacing: 3px;
+        color: #aa0e18;
+      }
+      .wanted-top h2 {
+        font-size: clamp(32px, 5vw, 60px);
+        font-weight: 900;
+        line-height: 1;
+      }
+
+      .news-block,
+      .wanted-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+      .news-card,
+      .wanted-box {
+        padding: 18px;
+        border: 2px solid #251a13;
+        background: rgba(255, 255, 255, 0.3);
+      }
+      .wanted-title {
+        text-align: center;
+        margin: 25px 0;
+        padding: 15px;
+        border-top: 4px solid #251a13;
+        border-bottom: 4px solid #251a13;
+      }
+      .wanted-title .red {
+        font-size: 32px;
+        font-weight: 900;
+        color: #a40815;
+      }
+      .wanted-title .name {
+        font-size: clamp(40px, 7vw, 72px);
+        font-weight: 900;
+      }
+      .warning {
+        margin-top: 22px;
+        padding: 20px;
+        color: #fff;
+        background: #220f12;
+        border: 3px solid #a40815;
+        text-align: center;
+      }
+      .chastity {
+        margin-top: 25px;
+        text-align: center;
+        font-size: clamp(26px, 5vw, 40px);
+        font-weight: 900;
+        color: #9f0715;
+        transform: rotate(-1deg);
+      }
+
+      /* Keyframes */
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-8px);
+        }
+      }
+      @keyframes bloodFly {
+        0% {
+          opacity: 1;
+          transform: translate(0, 0) scale(0.4);
+        }
+        100% {
+          opacity: 0;
+          transform: translate(var(--x), var(--y)) scale(1.2);
+        }
+      }
+      @keyframes buttonExplode {
+        100% {
+          opacity: 0;
+          transform: scale(1.8) rotate(-12deg);
+          filter: blur(6px);
+        }
+      }
+      @keyframes wantedAppear {
+        0% {
+          opacity: 0;
+          transform: translateY(50px) rotate(-4deg);
+        }
+        100% {
+          opacity: 1;
+          transform: translateY(0) rotate(-0.5deg);
+        }
+      }
+
+      body.final-mode {
+        display: block;
+        background: #080507;
+      }
+      body.final-mode .container {
+        display: none;
+      }
+
+      @media (max-width: 700px) {
+        .news-block,
+        .wanted-grid {
+          grid-template-columns: 1fr;
+        }
+        .button-row {
+          flex-direction: column;
+        }
+        .button {
+          width: 100%;
+        }
+        .wanted-avatar-placeholder {
+          width: 220px;
+          height: 220px;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Flashbang Overlay -->
+    <div class="flashbang" id="flashbang"></div>
+
+    <!-- Vignette Effect -->
+    <div class="vignette" id="vignette"></div>
+
+    <!-- Video Modal Container (from test3) -->
+    <div class="video-container" id="videoContainer">
+      <button class="skip-btn" id="skipBtn">Skip Video ⏩</button>
+      <!-- لینک ویدیو خودتون رو توی src پایین بذارید -->
+      <video id="cutsceneVideo" src="01.mp4" playsinline></video>
+    </div>
+
+    <!-- System Banner Warning -->
+    <div class="system-banner" id="systemBanner">🚨 SYSTEM WARNING 🚨</div>
+
+    <!-- ===================== MAIN PAGE (from TEST2) ===================== -->
+    <main class="container" id="mainContainer">
+      <div class="emoji" id="mainEmoji">🚧</div>
+      <h1>Warning: Extremely Distracted Developer at Work 🚧</h1>
+
+      <p class="text">
+        I could've made a normal
+        <span class="highlight">"Hello World"</span> page... BUTT...
+      </p>
+
+      <div class="quote">
+        “I'm literally building a website for someone I have a crush on. Why
+        would I waste the opportunity?” 😏
+      </div>
+
+      <p class="text">So yes...</p>
+      <p class="text" style="margin-top: 8px">
+        <span class="highlight"
+          >This entire website is partially your fault.</span
+        >
+      </p>
+
+      <p class="text2" style="margin-top: 12px; font-style: italic">
+        (I mean, how could I not? You're easily the sweetest, most adorable fox
+        on Twitch. 🦊💕)
+      </p>
+
+      <div class="divider"></div>
+
+      <p class="text">
+        I know I could’ve just sent a simple message in chat or Discord...<br />
+        <strong>But you deserve something special.</strong> Something made just
+        for you. ✨
+      </p>
+
+      <div class="divider"></div>
+
+      <!-- REVEAL BUTTON -->
+      <button class="reveal-button" id="revealButton" type="button">
+        Wait... there's more? 👀
+      </button>
+
+      <!-- HIDDEN SECTION -->
+      <div class="more-section" id="moreSection">
+        <p class="text" style="margin-top: 22px">
+          So now you have two options:<br />
+          <span class="highlight"
+            >1. Pretend you didn't see this and go back to streaming.</span
+          ><br />
+          <span class="highlight"
+            >2. Admit that this is the sweetest / most unhinged confession
+            someone has ever made for you. 😳</span
+          >
+        </p>
+
+        <p class="text" style="margin-top: 18px">
+          Either way...<br />
+          <span class="highlight"
+            >I think you owe me a VC now. I’d love to get to know you for real.
+            ;)</span
+          >
+        </p>
+
+        <div class="button-row">
+          <a
+            href="./letter5.html"
+            class="button"
+            id="sayHiBtn"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Come say hi. 💬
+          </a>
+          <button class="button secondary" id="hesitateButton" type="button">
+            I'm still deciding...
+          </button>
+        </div>
+
+        <div class="reaction" id="reaction"></div>
+      </div>
+
+      <div
+        class="footer"
+        style="
+          margin-top: 30px;
+          font-size: 11px;
+          color: rgba(255, 255, 255, 0.25);
+        "
+      >
+        Made with way too much affection.
+      </div>
+    </main>
+
+    <!-- FINALE OVERLAY -->
+    <div class="death-overlay" id="deathOverlay">
+      <div class="death-message">
+        <div class="big">NOOOOO 😭</div>
+        <div
+          class="small"
+          style="color: rgba(255, 255, 255, 0.7); margin-top: 10px"
+        >
+          You were warned.
+        </div>
+      </div>
+    </div>
+
+    <!-- BLOOD PARTICLES CONTAINER -->
+    <div class="blood" id="bloodContainer"></div>
+
+    <!-- ===================== WANTED SCREEN (from test.html) ===================== -->
+    <section class="wanted-wrapper" id="wantedWrapper">
+      <div class="wanted-screen">
+        <div class="wanted-top">
+          <div class="breaking">🚨 BREAKING NEWS 🚨</div>
+          <h2>SMO HAS ALMOST<br />KILLED ELIAS</h2>
+          <div
+            style="
+              font-size: 11px;
+              letter-spacing: 1px;
+              margin-top: 8px;
+              opacity: 0.6;
+            "
+          >
+            EXCLUSIVE • TOTALLY REAL • DEFINITELY NOT MADE UP
+          </div>
+        </div>
+
+        <div class="news-block">
+          <div class="news-card">
+            <h3 style="font-size: 15px; margin-bottom: 8px">
+              📰 Incident Report
+            </h3>
+            <p style="font-size: 13px; line-height: 1.6">
+              After an extended and completely unnecessary amount of button
+              pressing...
+            </p>
+            <p style="font-size: 13px; font-weight: 800; margin-top: 8px">
+              Current Status:<br />“Elias is still alive. Barely.”
+            </p>
+          </div>
+          <div class="news-card">
+            <h3 style="font-size: 15px; margin-bottom: 8px">
+              🩸 Current Condition
+            </h3>
+            <p style="font-size: 13px; font-weight: 800; line-height: 1.6">
+              Almost dead. Hard. Panicking. And an absolutely unreasonable
+              amount of pressure.
+            </p>
+          </div>
+          <div class="news-card">
+            <h3 style="font-size: 15px; margin-bottom: 8px">
+              🩸 Last Known Words
+            </h3>
+            <p style="font-size: 13px; font-style: italic; color: #8f0a15">
+              “SMO... you’re gonna make me—”
+            </p>
+            <p style="font-size: 12px; margin-top: 6px">
+              He never finished that sentence.
+            </p>
+          </div>
+          <div class="news-card">
+            <h3 style="font-size: 15px; margin-bottom: 8px">
+              🏥 Medical Statement
+            </h3>
+            <p style="font-size: 13px; line-height: 1.6">
+              Doctors have advised him to stop watching the stream and seek
+              immediate emotional support.
+            </p>
+          </div>
+        </div>
+
+        <div class="wanted-title">
+          <div class="red">🔴 WANTED 🔴</div>
+          <div class="name">SMO</div>
+        </div>
+        <div
+          class="wanted-avatar-placeholder"
+          style="
+            background-image: url(./Transperant.gif);
+            background-size: cover;
+            background-position: center;
+          "
+        ></div>
+        <div class="wanted-grid">
+          <div class="wanted-box">
+            <h4 style="font-size: 12px; margin-bottom: 6px">Crime</h4>
+            <p style="font-size: 13px">First-Degree Button Murder Attempt</p>
+          </div>
+          <div class="wanted-box">
+            <h4 style="font-size: 12px; margin-bottom: 6px">Reward</h4>
+            <div style="font-size: 26px; font-weight: 900; color: #a40815">
+              $1,000
+            </div>
+            <p style="font-size: 11px; opacity: 0.7">
+              He is extremely easy to catch.
+            </p>
+          </div>
+          <div class="wanted-box">
+            <h4 style="font-size: 12px; margin-bottom: 6px">
+              Additional Charges
+            </h4>
+            <ul style="font-size: 12px; padding-left: 16px; line-height: 1.6">
+              <li>Excessive teasing</li>
+              <li>Unlawful pressure</li>
+              <li>Repeated clicking after multiple warnings</li>
+              <li>Attempted destruction of Elias's last brain cell</li>
+            </ul>
+          </div>
+          <div class="wanted-box">
+            <h4 style="font-size: 12px; margin-bottom: 6px">
+              Official Fox Trap
+            </h4>
+            <p style="font-size: 12px; line-height: 1.6">
+              A box. A stick. And one cold Coca-Cola.<br /><strong
+                style="color: #8f0a15"
+                >That's literally it.</strong
+              >
+            </p>
+          </div>
+        </div>
+
+        <div class="warning">
+          <div
+            style="
+              font-size: 16px;
+              font-weight: 900;
+              color: #ff6672;
+              margin-bottom: 6px;
+            "
+          >
+            ⚠️ DO NOT APPROACH
+          </div>
+          <p style="font-size: 13px">
+            They are believed to be armed with a mouse and absolutely no
+            self-control.
+          </p>
+          <p style="font-size: 13px; margin-top: 6px">
+            If spotted: <strong>DO NOT CALL HIM CUTE.</strong> The fox gets
+            flustered way too easily. 🦊
+          </p>
+        </div>
+
+        <div class="chastity">PUT HIM IN CHASTITY. 🔒</div>
+        <div
+          style="
+            text-align: center;
+            margin-top: 10px;
+            font-size: 12px;
+            font-weight: 700;
+            opacity: 0.6;
+          "
+        >
+          May he get caught. 😭
+        </div>
+      </div>
+    </section>
+
+    <script>
+      /* Audio Effects */
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+      function playPopSound(freq = 400) {
+        if (audioCtx.state === "suspended") audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(
+          freq * 1.8,
+          audioCtx.currentTime + 0.08,
+        );
+        gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(
+          0.01,
+          audioCtx.currentTime + 0.08,
+        );
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.08);
+      }
+
+      function playShutterSound() {
+        if (audioCtx.state === "suspended") audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = "square";
+        osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(
+          100,
+          audioCtx.currentTime + 0.15,
+        );
+        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(
+          0.01,
+          audioCtx.currentTime + 0.15,
+        );
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.15);
+      }
+
+      /* DOM Elements */
+      const container = document.getElementById("mainContainer");
+      const revealButton = document.getElementById("revealButton");
+      const moreSection = document.getElementById("moreSection");
+      const hesitateButton = document.getElementById("hesitateButton");
+      const reaction = document.getElementById("reaction");
+      const mainEmoji = document.getElementById("mainEmoji");
+      const sayHiBtn = document.getElementById("sayHiBtn");
+      const vignette = document.getElementById("vignette");
+      const systemBanner = document.getElementById("systemBanner");
+      const flashbang = document.getElementById("flashbang");
+
+      /* Video Elements */
+      const videoContainer = document.getElementById("videoContainer");
+      const cutsceneVideo = document.getElementById("cutsceneVideo");
+      const skipBtn = document.getElementById("skipBtn");
+
+      let clickCount = 0;
+      let finalTriggered = false;
+
+      const stages = [
+        {
+          button: "I'm still deciding...",
+          reaction: "Take your time. I'm totally not nervous. ♥",
+          emoji: "🚧",
+          banner: "STATUS: NORMAL",
+        },
+        {
+          button: "Wait... you're clicking it?",
+          reaction: "Oh. You actually clicked it. 👀",
+          emoji: "😳",
+          banner: "WARNING: HEART RATE INCREASING",
+        },
+        {
+          button: "Okay, you're making me nervous.",
+          reaction: "I feel like you're enjoying this a little too much. 😭",
+          emoji: "🫣",
+          banner: "CRITICAL: BLUSH LEVEL HIGH",
+        },
+        {
+          button: "Smo... please.",
+          reaction: "Why are you still clicking this...? 😭",
+          emoji: "🥺",
+          banner: "SYSTEM OVERHEAT IMMINENT",
+        },
+        {
+          button: "I'm literally blushing.",
+          reaction:
+            "This was supposed to be your website. Why am I the one panicking?",
+          emoji: "😵‍💫",
+          banner: "DANGER: HIGH STRESS DETECTED",
+        },
+        {
+          button: "STOP MAKING ME NERVOUS 😭",
+          reaction: "Okay. Okay. You win. I'm officially panicking.",
+          emoji: "😭",
+          banner: "ALERT: BRAIN CELLS DESTROYED",
+        },
+        {
+          button: "SMO, PLEASE... I'M CRYING. 😭💧",
+          reaction: "I CAN'T TAKE IT ANYMORE. JUST COME SAY HI. ♥",
+          emoji: "😭",
+          banner: "CRITICAL DAMAGE SUSTAINED",
+        },
+      ];
+
+      const particleEmojis = ["😳", "💧", "♥", "✨", "🥺", "💥"];
+
+      revealButton.addEventListener("click", () => {
+        playPopSound(500);
+        revealButton.classList.add("hidden");
+        moreSection.classList.add("show");
+        setTimeout(
+          () =>
+            moreSection.scrollIntoView({ behavior: "smooth", block: "center" }),
+          150,
+        );
+      });
+
+      sayHiBtn.addEventListener("click", () => {
+        confetti({
+          particleCount: 120,
+          spread: 80,
+          origin: { y: 0.6 },
+          colors: ["#ff69b4", "#ffb6c1", "#ffffff"],
+        });
+      });
+
+      hesitateButton.addEventListener("click", (e) => {
+        if (finalTriggered) return;
+        clickCount++;
+        playPopSound(250 + clickCount * 80);
+
+        spawnParticles(e.clientX, e.clientY);
+
+        if (clickCount >= stages.length) {
+          triggerVideoCutscene();
+          return;
+        }
+
+        const stage = stages[clickCount - 1];
+
+        // Global Screen Shake
+        document.body.className = "";
+        void document.body.offsetWidth;
+        const shakeLevel = Math.min(clickCount, 4);
+        document.body.classList.add(`shake-screen-${shakeLevel}`);
+
+        // Container Zoom & Vignette
+        const scaleVal = 1 + clickCount * 0.025;
+        container.style.transform = `scale(${scaleVal})`;
+        vignette.style.boxShadow = `inset 0 0 ${clickCount * 30}px rgba(255, 30, 80, ${clickCount * 0.12})`;
+
+        systemBanner.textContent = stage.banner;
+        systemBanner.classList.add("show");
+
+        hesitateButton.textContent = stage.button;
+        reaction.textContent = stage.reaction;
+        mainEmoji.textContent = stage.emoji;
+      });
+
+      function spawnParticles(x, y) {
+        const amount = 8 + clickCount * 3;
+        for (let i = 0; i < amount; i++) {
+          const p = document.createElement("span");
+          p.className = "floating-particle";
+          p.textContent =
+            particleEmojis[Math.floor(Math.random() * particleEmojis.length)];
+          p.style.left = `${x}px`;
+          p.style.top = `${y}px`;
+
+          const dx = (Math.random() - 0.5) * (200 + clickCount * 50);
+          const dy = (Math.random() - 0.7) * (200 + clickCount * 50);
+          const rot = (Math.random() - 0.5) * 360;
+
+          p.style.setProperty("--dx", `${dx}px`);
+          p.style.setProperty("--dy", `${dy}px`);
+          p.style.setProperty("--rot", `${rot}deg`);
+
+          document.body.appendChild(p);
+          setTimeout(() => p.remove(), 1200);
+        }
+      }
+
+      /* 1. After last click → play video cutscene */
+      function triggerVideoCutscene() {
+        finalTriggered = true;
+        systemBanner.classList.remove("show");
+        hesitateButton.disabled = true;
+        hesitateButton.textContent = "YOU'VE DONE ENOUGH. 😭";
+        reaction.textContent = "OH GOD. THAT WAS THE LAST ONE.";
+        mainEmoji.textContent = "💀";
+        hesitateButton.className = "button secondary explode";
+
+        createBloodSplash();
+
+        // Show death overlay briefly then video
+        setTimeout(() => {
+          document.getElementById("deathOverlay").classList.add("active");
+        }, 250);
+
+        setTimeout(() => {
+          document.getElementById("deathOverlay").classList.remove("active");
+          videoContainer.classList.add("active");
+          cutsceneVideo.currentTime = 0;
+          cutsceneVideo.play().catch((err) => {
+            // If autoplay fails, go straight to wanted
+            finishVideoAndShowWanted();
+          });
+        }, 1100);
+      }
+
+      function createBloodSplash() {
+        const bloodContainer = document.getElementById("bloodContainer");
+        for (let i = 0; i < 70; i++) {
+          const dot = document.createElement("span");
+          dot.className = "blood-dot";
+          dot.style.left = `${50 + (Math.random() * 10 - 5)}%`;
+          dot.style.top = `${54 + (Math.random() * 8 - 4)}%`;
+          dot.style.setProperty("--x", `${Math.random() * 900 - 450}px`);
+          dot.style.setProperty("--y", `${Math.random() * 700 - 450}px`);
+          bloodContainer.appendChild(dot);
+        }
+      }
+
+      /* 2. When video ends or is skipped */
+      cutsceneVideo.addEventListener("ended", finishVideoAndShowWanted);
+      skipBtn.addEventListener("click", finishVideoAndShowWanted);
+
+      function finishVideoAndShowWanted() {
+        cutsceneVideo.pause();
+        videoContainer.classList.remove("active");
+
+        // Flashbang + shutter sound (from test3 / TEST2)
+        flashbang.classList.add("active");
+        playShutterSound();
+        setTimeout(() => flashbang.classList.remove("active"), 120);
+
+        document.body.className = "final-mode";
+        document.getElementById("mainContainer").style.display = "none";
+        document.getElementById("wantedWrapper").classList.add("show");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    </script>
+  </body>
+</html>
